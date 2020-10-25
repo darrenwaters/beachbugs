@@ -1,0 +1,163 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#load packages -------- 
+
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+library(janeaustenr)
+library(skimr)
+library(magrittr)
+```
+
+# import the dataset sydneybeaches.csv
+# create a dataframe called sydneybeaches from the CSV
+
+```{r}
+sydneybeaches <- read_csv("beachdata.csv")
+```
+
+
+## Now investigate the data
+```{r}
+View(sydneybeaches)
+```
+
+```{r}
+dim(sydneybeaches)
+```
+```{r}
+str(sydneybeaches)
+```
+
+
+
+```{r}
+glimpse(sydneybeaches)
+```
+```{r}
+skim(sydneybeaches)
+```
+
+## Tidying columns - cleaning column names to make them consistent and tidy
+
+```{r}
+##Select all (diplyr) grabs the vector and toupper moves all the headers of columns to upper case
+select_all(sydneybeaches, toupper)
+```
+
+```{r}
+## In Janitor::clean_names  you can clean names and put underscores between names in headers and make them all lower case.
+clean_names(sydneybeaches)
+```
+## However, these functions are not saving those changes on the data. So we need to create a new object and then run the function.
+
+```{r}
+## So my new object is cleanbeaches and I'm running the function clean_names on my imported obj
+cleanbeaches <- clean_names(sydneybeaches)
+```
+
+```{r}
+##Renaming columns in your dataframe. New name always appears before old name newname = oldname. And assign it to an object. But you can overwrite the object
+cleanbeaches <- rename(cleanbeaches, beachbugs = enterococci_cfu_100ml)
+```
+
+```{r}
+## Using Select to select just a subset of data interested in from a dataframe
+## This command selects three of the columns from the dataframe cleanbeaches by using the headings and we use "everything" do effectively reorder the spreadsheet
+select(cleanbeaches, council, site, beachbugs, everything())
+
+```
+## What happens if you want to lots of different functions in a row, clean, rename restructure the original dataframe. This is where you can use the funciton pipe %>% . This needs to be done using the magrittr package.
+## So I could have done all the steps above by using the pipe and you don't need to specificy the original dataframe name.
+
+```{r}
+
+```
+
+```{r}
+cleanerbeaches <- select(cleanbeaches, council, site, beachbugs, everything())
+write_csv(cleanerbeaches, "cleanerbeaches.csv")
+```
+
+## So let's do some exploring - which beach has the most extreme level of bugs
+
+```{r}
+worstbugs <- cleanerbeaches %>% arrange(desc(beachbugs))
+```
+
+```{r}
+## Names - lists the column headings
+names(worstbugs)
+```
+
+
+```{r}
+ ## Now we're going to filter the date, looking only at Coogee beach and sorting them on descending values in beachbugs. The "-" in front of the column name beach bugs means descending order. Site == means an exact match in the sheet.
+## And we're going to put the results in a new data frame
+
+worstcoogee <- worstbugs %>% 
+  filter(site == "Coogee Beach") %>%
+  arrange(-beachbugs)
+  
+
+```
+
+```{r}
+## let's compare max bug values across 2 different beaches - Coogee and Bondi
+## I want to sort them in terms of descending values on beachbugs and pop the results into a new data.frame
+bondivcoogee <- cleanerbeaches %>%
+  filter(site %in% c("Coogee Beach", "Bondi Beach")) %>%
+  arrange(-beachbugs)
+```
+
+```{r}
+## Use summary - but broken down by groups. i.e We want a summary of a dataframe but grouped by specific values,in this case Coogee and Bondi. In this case we want the max, min and standard deviation values on beachbugs but only for Coogee and Bondi and we're telling R to ignore NA values because that causes some issues. 
+cleanerbeaches %>%
+  filter(site %in% c("Coogee Beach", "Bondi Beach")) %>%
+  group_by(site) %>%
+  summarise(maxbug = max(beachbugs, na.rm = TRUE), 
+            meanbugs = mean(beachbugs, na.rm = TRUE),
+            medianbugs = median(beachbugs, na.rm = TRUE),
+            sdbugs = sd(beachbugs, na.rm = TRUE))
+```
+
+```{r}
+## What if we wanted to get these particular summary stats on beachbugs but for all beaches and group by all beaches. We simply remove the filter function in the code above. Like so.... and because it's hard to read I'm going to create a new dataframe object called summarybugs.
+summarybugs <- cleanerbeaches %>%
+  group_by(site) %>%
+  summarise(maxbug = max(beachbugs, na.rm = TRUE), 
+            meanbugs = mean(beachbugs, na.rm = TRUE),
+            medianbugs = median(beachbugs, na.rm = TRUE),
+            sdbugs = sd(beachbugs, na.rm = TRUE))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
