@@ -137,9 +137,40 @@ summarybugs <- cleanerbeaches %>%
 
 ```
 
+```{r}
+##Going off piste a little here... I'm going to attempt to group and filter my data by council to see who is the worst. Let's first of all just look at the councils in terms of worst for beach bugs in descending order
+
+cleanerbeaches %>%
+  group_by(council) %>%
+  arrange(-beachbugs)
+  
+```
 
 
+```{r}
+## Ok, so let's say I wanted to compare councils. First of all - let's see how many distinct variables (e.g. council names) there are in the councils column. In other words, how many councils will be be comparing? 
+cleanerbeaches %>%
+ distinct(council)
+```
+```{r}
+cleanerbeaches %>%
+  group_by(council) %>%
+  summarise(maxbug = max(beachbugs, na.rm = TRUE), 
+            meanbugs = mean(beachbugs, na.rm = TRUE),
+            medianbugs = median(beachbugs, na.rm = TRUE),
+            sdbugs = sd(beachbugs, na.rm = TRUE))
+```
 
+```{r}
+## But let's group by council and beach (site) because it might be one beach that one of the councils is looking after that is driving this. We can do this by grouping by more than one thing. And then let's create a dataframe so we can keep this separately
+
+councilbysitebugs <- cleanerbeaches %>%
+  group_by(council, site) %>%
+    summarise(maxbug = max(beachbugs, na.rm = TRUE), 
+            meanbugs = mean(beachbugs, na.rm = TRUE),
+            medianbugs = median(beachbugs, na.rm = TRUE),
+            sdbugs = sd(beachbugs, na.rm = TRUE))
+```
 
 
 
